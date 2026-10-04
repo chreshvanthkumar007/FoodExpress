@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restaurant.name }} - Menu - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Restaurant Banner Card -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 bg-white">
+    <div class="row g-0 align-items-center">
+      <div class="col-md-5 col-lg-4">
+        <div style="height: 250px; overflow: hidden;">
+          <img src="{{ url_for('static', filename='images/' + restaurant.image) }}" alt="{{ restaurant.name }}" class="w-100 h-100 object-fit-cover">
+        </div>
+      </div>
+      <div class="col-md-7 col-lg-8 p-4">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <span class="badge bg-success px-3 py-1 rounded-pill">
+            <i class="bi bi-star-fill text-warning me-1"></i> {{ restaurant.rating }} Rating
+          </span>
+          <span class="badge bg-light text-dark border px-3 py-1 rounded-pill">
+            <i class="bi bi-clock me-1"></i> {{ restaurant.delivery_time }}
+          </span>
+          <span class="badge bg-light text-dark border px-3 py-1 rounded-pill">
+            <i class="bi bi-bicycle me-1 text-primary"></i> 
+            {% if restaurant.delivery_fee == 0 %}FREE DELIVERY{% else %}₹{{ restaurant.delivery_fee }} Delivery{% endif %}
+          </span>
+        </div>
+
+        <h2 class="fw-bold mb-1">{{ restaurant.name }}</h2>
+        <p class="text-primary fw-semibold mb-2">{{ restaurant.cuisine }}</p>
+        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ restaurant.location }}</p>
+        <p class="text-muted mb-0 small">{{ restaurant.description }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Section Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">Menu Items ({{ food_items | length }})</h3>
+  </div>
+
+  <!-- Food Items Grid -->
+  {% if food_items %}
+    <div class="row g-4">
+      {% for item in food_items %}
+      <div class="col-lg-4 col-md-6">
+        <div class="food-card">
+          <div class="food-img-wrapper">
+            <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}">
+          </div>
+          <div class="food-card-body">
+            <div class="food-header">
+              <span class="food-type-icon {{ item.food_type }}" title="{{ item.food_type | capitalize }}"></span>
+              <span class="badge bg-light text-muted border small">{{ item.category.name }}</span>
+            </div>
+            <h5 class="food-title">{{ item.name }}</h5>
+            <p class="food-desc">{{ item.description }}</p>
+
+            {% if item.ingredients %}
+            <div class="text-muted small mb-2 text-truncate" style="font-size: 0.78rem;">
+              <strong>Ingredients:</strong> {{ item.ingredients }}
+            </div>
+            {% endif %}
+
+            <div class="food-card-footer">
+              <div class="food-price">₹{{ item.price }}</div>
+              <div class="d-flex gap-2">
+                <a href="{{ url_for('food_details', food_id=item.id) }}" class="btn btn-sm btn-light border" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <button onclick="addToCart({{ item.id }})" class="btn btn-sm btn-primary-custom" {% if not item.availability %}disabled{% endif %}>
+                  {% if item.availability %}
+                    <i class="bi bi-plus-lg"></i> Add to Cart
+                  {% else %}
+                    Sold Out
+                  {% endif %}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+      <p class="text-muted mb-0">No food items currently available for this restaurant.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

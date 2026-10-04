@@ -1,0 +1,87 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Restaurants - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-dark mb-1">Restaurant Partners</h2>
+    <p class="text-muted mb-0">Manage partner kitchens, delivery coverage, and ratings</p>
+  </div>
+  <a href="{{ url_for('admin_restaurant_add') }}" class="btn btn-primary-custom">
+    <i class="bi bi-plus-lg me-1"></i> Add New Restaurant
+  </a>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="input-group" style="max-width: 320px;">
+      <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+      <input type="text" id="admin-table-search" class="form-control" placeholder="Filter restaurants...">
+    </div>
+    <span class="badge bg-light text-dark border px-3 py-2">Total: {{ restaurants | length }}</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th>Restaurant</th>
+          <th>Cuisine</th>
+          <th>Location</th>
+          <th>Delivery Info</th>
+          <th>Rating</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rest in restaurants %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <img src="{{ url_for('static', filename='images/' + rest.image) }}" alt="{{ rest.name }}" class="rounded-3 object-fit-cover" style="width: 50px; height: 50px;">
+              <div>
+                <div class="fw-bold text-dark">{{ rest.name }}</div>
+                <small class="text-muted">{{ rest.food_items | length }} menu items</small>
+              </div>
+            </div>
+          </td>
+          <td class="text-muted">{{ rest.cuisine }}</td>
+          <td class="text-muted small" style="max-width: 200px;">{{ rest.location }}</td>
+          <td>
+            <div class="small fw-semibold text-dark"><i class="bi bi-clock me-1 text-primary"></i> {{ rest.delivery_time }}</div>
+            <div class="small text-muted">Fee: ₹{{ rest.delivery_fee }}</div>
+          </td>
+          <td>
+            <span class="badge bg-success-subtle text-success">
+              <i class="bi bi-star-fill text-warning me-1"></i> {{ rest.rating }}
+            </span>
+          </td>
+          <td>
+            <span class="badge {{ 'bg-success' if rest.status == 'active' else 'bg-secondary' }} px-2 py-1 rounded-pill">
+              {{ rest.status | capitalize }}
+            </span>
+          </td>
+          <td class="text-end">
+            <div class="d-flex gap-2 justify-content-end">
+              <a href="{{ url_for('restaurant_detail', restaurant_id=rest.id) }}" class="btn btn-sm btn-light border" title="View Menu" target="_blank">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{{ url_for('admin_restaurant_edit', restaurant_id=rest.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit Restaurant">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form action="{{ url_for('admin_restaurant_delete', restaurant_id=rest.id) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger btn-delete-confirm" data-item="{{ rest.name }}" title="Delete Restaurant">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

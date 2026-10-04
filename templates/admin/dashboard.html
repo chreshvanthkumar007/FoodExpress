@@ -1,0 +1,219 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Dashboard - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="fw-bold text-dark mb-1">Operational Overview</h2>
+  <p class="text-muted mb-0">Real-time metrics, order fulfillment, and platform inventory</p>
+</div>
+
+<!-- Dashboard Statistics Cards (7 key metrics) -->
+<div class="row g-3 mb-4">
+  <!-- Total Revenue -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <p class="stat-label">Total Revenue</p>
+        <h3 class="stat-value text-primary">₹{{ "%.2f" | format(stats.total_revenue) }}</h3>
+      </div>
+      <div class="stat-icon primary">
+        <i class="bi bi-currency-rupee"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Orders -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <p class="stat-label">Total Orders</p>
+        <h3 class="stat-value">{{ stats.total_orders }}</h3>
+      </div>
+      <div class="stat-icon info">
+        <i class="bi bi-bag-check"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Orders -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <p class="stat-label">Pending Orders</p>
+        <h3 class="stat-value text-warning">{{ stats.pending_orders }}</h3>
+      </div>
+      <div class="stat-icon warning">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivered Orders -->
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div>
+        <p class="stat-label">Delivered Orders</p>
+        <h3 class="stat-value text-success">{{ stats.delivered_orders }}</h3>
+      </div>
+      <div class="stat-icon success">
+        <i class="bi bi-check2-all"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Users -->
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card">
+      <div>
+        <p class="stat-label">Registered Customers</p>
+        <h3 class="stat-value">{{ stats.total_users }}</h3>
+      </div>
+      <div class="stat-icon primary">
+        <i class="bi bi-people"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Restaurants -->
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card">
+      <div>
+        <p class="stat-label">Active Restaurants</p>
+        <h3 class="stat-value">{{ stats.total_restaurants }}</h3>
+      </div>
+      <div class="stat-icon info">
+        <i class="bi bi-shop"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Food Items -->
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card">
+      <div>
+        <p class="stat-label">Total Menu Dishes</p>
+        <h3 class="stat-value">{{ stats.total_foods }}</h3>
+      </div>
+      <div class="stat-icon success">
+        <i class="bi bi-cup-hot"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Orders & System Quick Actions -->
+<div class="row g-4">
+  <!-- Recent Orders Table -->
+  <div class="col-xl-8">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h5 class="admin-card-title"><i class="bi bi-clock-history me-2 text-primary"></i> Recent Incoming Orders</h5>
+        <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-outline-custom">View All Orders</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table admin-table mb-0">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if recent_orders %}
+              {% for order in recent_orders %}
+              <tr>
+                <td>
+                  <span class="fw-bold">{{ order.formatted_id }}</span>
+                  <div class="text-muted" style="font-size: 0.75rem;">{{ order.order_date.strftime('%H:%M, %d %b') if order.order_date else '' }}</div>
+                </td>
+                <td>
+                  <div class="fw-semibold">{{ order.user.name if order.user else 'Customer' }}</div>
+                  <div class="text-muted small">{{ order.phone }}</div>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border">{{ order.items | length }} items</span>
+                </td>
+                <td class="fw-bold">₹{{ "%.2f" | format(order.total_amount) }}</td>
+                <td>
+                  {% set status_class = 'bg-secondary' %}
+                  {% if order.order_status == 'Delivered' %}{% set status_class = 'bg-success' %}
+                  {% elif order.order_status == 'Preparing' %}{% set status_class = 'bg-warning text-dark' %}
+                  {% elif order.order_status == 'Out for Delivery' %}{% set status_class = 'bg-primary' %}
+                  {% elif order.order_status == 'Accepted' %}{% set status_class = 'bg-info' %}
+                  {% elif order.order_status in ['Cancelled', 'Rejected'] %}{% set status_class = 'bg-danger' %}
+                  {% endif %}
+                  <span class="badge {{ status_class }} px-2 py-1 rounded-pill">{{ order.order_status }}</span>
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('admin_order_detail', order_id=order.id) }}" class="btn btn-sm btn-light border">
+                    Manage
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">No recent orders yet.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions & Recent Messages -->
+  <div class="col-xl-4">
+    <!-- Quick Management Short Cuts -->
+    <div class="admin-card mb-4">
+      <div class="admin-card-header">
+        <h5 class="admin-card-title"><i class="bi bi-lightning-charge me-2 text-warning"></i> Quick Operations</h5>
+      </div>
+      <div class="p-3 d-grid gap-2">
+        <a href="{{ url_for('admin_food_add') }}" class="btn btn-outline-custom text-start d-flex align-items-center justify-content-between">
+          <span><i class="bi bi-plus-circle me-2"></i> Add New Food Dish</span>
+          <i class="bi bi-chevron-right small"></i>
+        </a>
+        <a href="{{ url_for('admin_restaurant_add') }}" class="btn btn-outline-secondary text-start d-flex align-items-center justify-content-between">
+          <span><i class="bi bi-shop me-2"></i> Onboard New Restaurant</span>
+          <i class="bi bi-chevron-right small"></i>
+        </a>
+        <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-secondary text-start d-flex align-items-center justify-content-between">
+          <span><i class="bi bi-truck me-2"></i> Update Order Dispatches</span>
+          <i class="bi bi-chevron-right small"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Messages Preview -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h5 class="admin-card-title"><i class="bi bi-chat-left-text me-2 text-info"></i> Latest Feedback</h5>
+        <a href="{{ url_for('admin_messages') }}" class="small text-muted text-decoration-none">All</a>
+      </div>
+      <div class="p-3">
+        {% if recent_messages %}
+          <div class="d-flex flex-column gap-3">
+            {% for msg in recent_messages %}
+            <div class="border-bottom pb-2">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-bold small text-dark">{{ msg.name }}</span>
+                <span class="text-muted" style="font-size: 0.72rem;">{{ msg.created_at.strftime('%d %b') }}</span>
+              </div>
+              <p class="text-muted small mb-0 text-truncate">{{ msg.message }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0 text-center py-3">No contact messages received.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

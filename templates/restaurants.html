@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Restaurants - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Header Banner -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Discover Restaurants</h2>
+      <p class="text-muted mb-0">Order from top-rated dining spots and cloud kitchens nearby</p>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <form action="{{ url_for('restaurants') }}" method="GET" class="d-flex gap-2" style="max-width: 400px; width: 100%;">
+      <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search by name or cuisine..." value="{{ search_query or '' }}">
+        <button class="btn btn-primary-custom" type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Restaurant Cards Grid -->
+  {% if restaurants %}
+    <div class="row g-4">
+      {% for restaurant in restaurants %}
+      <div class="col-lg-4 col-md-6">
+        <div class="restaurant-card">
+          <div class="restaurant-img-wrapper">
+            <img src="{{ url_for('static', filename='images/' + restaurant.image) }}" alt="{{ restaurant.name }}">
+            <span class="restaurant-badge-rating">
+              <i class="bi bi-star-fill text-warning"></i> {{ restaurant.rating }}
+            </span>
+            <span class="restaurant-time-badge">
+              <i class="bi bi-clock me-1"></i> {{ restaurant.delivery_time }}
+            </span>
+          </div>
+          <div class="restaurant-info">
+            <h5 class="restaurant-name">{{ restaurant.name }}</h5>
+            <div class="restaurant-cuisine">{{ restaurant.cuisine }}</div>
+            <div class="restaurant-location">
+              <i class="bi bi-geo-alt"></i> {{ restaurant.location }}
+            </div>
+            <p class="text-muted small mb-3 text-truncate">{{ restaurant.description }}</p>
+
+            <div class="restaurant-footer">
+              <span class="restaurant-delivery-fee">
+                <i class="bi bi-bicycle me-1 text-primary"></i> 
+                {% if restaurant.delivery_fee == 0 %}
+                  <span class="text-success fw-bold">FREE DELIVERY</span>
+                {% else %}
+                  ₹{{ restaurant.delivery_fee }} Delivery
+                {% endif %}
+              </span>
+              <a href="{{ url_for('restaurant_detail', restaurant_id=restaurant.id) }}" class="btn btn-sm btn-primary-custom">
+                View Menu <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 bg-white rounded-4 shadow-sm my-4">
+      <i class="bi bi-emoji-frown text-muted" style="font-size: 3.5rem;"></i>
+      <h4 class="fw-bold mt-3">No restaurants found</h4>
+      <p class="text-muted">We couldn't find any restaurants matching "{{ search_query }}".</p>
+      <a href="{{ url_for('restaurants') }}" class="btn btn-outline-custom">View All Restaurants</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

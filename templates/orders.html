@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-bag-check text-primary me-2"></i> Order History</h2>
+      <p class="text-muted mb-0">Review past deliveries and track active meal shipments</p>
+    </div>
+    <a href="{{ url_for('menu') }}" class="btn btn-outline-custom">
+      <i class="bi bi-plus-lg me-1"></i> New Order
+    </a>
+  </div>
+
+  {% if orders %}
+  <div class="d-flex flex-column gap-3">
+    {% for order in orders %}
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom pb-3 mb-3">
+        <div>
+          <span class="badge bg-light text-dark border px-3 py-1 fs-6 fw-bold me-2">{{ order.formatted_id }}</span>
+          <span class="text-muted small">Placed on {{ order.order_date.strftime('%d %b %Y, %I:%M %p') if order.order_date else 'Recently' }}</span>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <!-- Status Badge -->
+          {% set status_class = 'bg-secondary' %}
+          {% if order.order_status == 'Delivered' %}{% set status_class = 'bg-success' %}
+          {% elif order.order_status == 'Preparing' %}{% set status_class = 'bg-warning text-dark' %}
+          {% elif order.order_status == 'Out for Delivery' %}{% set status_class = 'bg-primary' %}
+          {% elif order.order_status == 'Accepted' %}{% set status_class = 'bg-info' %}
+          {% elif order.order_status in ['Cancelled', 'Rejected'] %}{% set status_class = 'bg-danger' %}
+          {% endif %}
+          <span class="badge {{ status_class }} px-3 py-2 rounded-pill fw-bold">
+            {{ order.order_status }}
+          </span>
+
+          <span class="fs-5 fw-bold text-dark">₹{{ "%.2f" | format(order.total_amount) }}</span>
+        </div>
+      </div>
+
+      <div class="row g-3 align-items-center">
+        <!-- Order Items Preview -->
+        <div class="col-md-7">
+          <div class="text-muted small mb-1 fw-semibold text-uppercase">Items Ordered:</div>
+          <div class="d-flex flex-wrap gap-2">
+            {% for item in order.items %}
+            <span class="badge bg-light text-dark border p-2">
+              <span class="food-type-icon {{ item.food_item.food_type if item.food_item else 'veg' }} me-1"></span>
+              {{ item.quantity }}x {{ item.food_item.name if item.food_item else 'Dish' }}
+            </span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Order Address and Payment -->
+        <div class="col-md-3">
+          <div class="text-muted small mb-1 fw-semibold text-uppercase">Paid Via:</div>
+          <div class="small text-dark fw-semibold mb-1">{{ order.payment_method }}</div>
+          <div class="text-muted small text-truncate" title="{{ order.delivery_address }}">
+            <i class="bi bi-geo-alt me-1"></i> {{ order.delivery_address }}
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="col-md-2 text-md-end d-flex flex-column gap-2">
+          <a href="{{ url_for('order_detail', order_id=order.id) }}" class="btn btn-sm btn-primary-custom w-100">
+            Track Order <i class="bi bi-chevron-right ms-1"></i>
+          </a>
+          {% if order.order_status == 'Order Placed' %}
+          <form action="{{ url_for('cancel_order', order_id=order.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+            <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+              <i class="bi bi-x-circle me-1"></i> Cancel
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5 bg-white rounded-4 shadow-sm my-4">
+    <i class="bi bi-receipt text-muted" style="font-size: 3.5rem;"></i>
+    <h4 class="fw-bold mt-3">No orders placed yet</h4>
+    <p class="text-muted">You haven't ordered any delicious food yet. Check out our restaurant partners!</p>
+    <a href="{{ url_for('menu') }}" class="btn btn-primary-custom px-4 py-2 mt-2">
+      Order Food Now
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

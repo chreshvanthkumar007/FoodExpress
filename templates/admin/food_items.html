@@ -1,0 +1,95 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Food Items Catalog - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-dark mb-1">Dishes & Menu Catalog</h2>
+    <p class="text-muted mb-0">Manage food items, pricing, inventory availability, and dietary tags</p>
+  </div>
+  <a href="{{ url_for('admin_food_add') }}" class="btn btn-primary-custom">
+    <i class="bi bi-plus-lg me-1"></i> Add Food Item
+  </a>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="input-group" style="max-width: 320px;">
+      <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+      <input type="text" id="admin-table-search" class="form-control" placeholder="Search dish or kitchen...">
+    </div>
+    <span class="badge bg-light text-dark border px-3 py-2">Total Dishes: {{ foods | length }}</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th>Dish</th>
+          <th>Restaurant</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th>Availability</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for food in foods %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <img src="{{ url_for('static', filename='images/' + food.image) }}" alt="{{ food.name }}" class="rounded-3 object-fit-cover" style="width: 50px; height: 50px;">
+              <div>
+                <div class="fw-bold text-dark">{{ food.name }}</div>
+                <small class="text-muted text-truncate d-inline-block" style="max-width: 220px;">{{ food.description }}</small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <a href="{{ url_for('restaurant_detail', restaurant_id=food.restaurant.id) }}" target="_blank" class="fw-semibold text-dark text-decoration-none">
+              {{ food.restaurant.name }}
+            </a>
+          </td>
+          <td>
+            <span class="badge bg-light text-dark border">{{ food.category.name }}</span>
+          </td>
+          <td>
+            <span class="badge {{ 'badge-veg' if food.food_type == 'veg' else 'badge-nonveg' }} px-2 py-1">
+              <span class="food-type-icon {{ food.food_type }} me-1"></span>
+              {{ food.food_type | capitalize }}
+            </span>
+          </td>
+          <td class="fw-bold text-dark">
+            ₹{{ food.price }}
+          </td>
+          <td>
+            <form action="{{ url_for('admin_food_toggle', food_id=food.id) }}" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-sm {{ 'btn-success' if food.availability else 'btn-secondary' }} rounded-pill px-3 py-1" style="font-size: 0.8rem;" title="Click to toggle availability">
+                {{ 'Available' if food.availability else 'Sold Out' }}
+              </button>
+            </form>
+          </td>
+          <td class="text-end">
+            <div class="d-flex gap-2 justify-content-end">
+              <a href="{{ url_for('food_details', food_id=food.id) }}" class="btn btn-sm btn-light border" title="View Public Page" target="_blank">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{{ url_for('admin_food_edit', food_id=food.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit Item">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form action="{{ url_for('admin_food_delete', food_id=food.id) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger btn-delete-confirm" data-item="{{ food.name }}" title="Delete Food Item">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

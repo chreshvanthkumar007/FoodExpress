@@ -1,0 +1,70 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Contact Inquiries - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-dark mb-1">Customer Inquiries & Feedback</h2>
+    <p class="text-muted mb-0">Messages submitted through the public Contact Us portal</p>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="input-group" style="max-width: 320px;">
+      <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+      <input type="text" id="admin-table-search" class="form-control" placeholder="Search feedback...">
+    </div>
+    <span class="badge bg-light text-dark border px-3 py-2">Messages: {{ messages | length }}</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th>Sender</th>
+          <th>Contact Info</th>
+          <th>Message Content</th>
+          <th>Date Sent</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if messages %}
+          {% for msg in messages %}
+          <tr>
+            <td>
+              <div class="fw-bold text-dark">{{ msg.name }}</div>
+            </td>
+            <td>
+              <div><a href="mailto:{{ msg.email }}" class="text-primary text-decoration-none">{{ msg.email }}</a></div>
+              <div class="text-muted small">{{ msg.phone or 'Not provided' }}</div>
+            </td>
+            <td style="max-width: 350px;">
+              <p class="mb-0 text-secondary">{{ msg.message }}</p>
+            </td>
+            <td class="text-muted small">
+              {{ msg.created_at.strftime('%d %b %Y, %I:%M %p') }}
+            </td>
+            <td class="text-end">
+              <form action="{{ url_for('admin_message_delete', message_id=msg.id) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger btn-delete-confirm" data-item="this inquiry message">
+                  <i class="bi bi-trash3"></i> Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+              No feedback messages found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

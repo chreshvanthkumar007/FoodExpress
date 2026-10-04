@@ -1,0 +1,91 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ 'Edit' if food else 'Add' }} Food Item - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin_food') }}" class="text-muted small text-decoration-none mb-1 d-inline-block">
+    <i class="bi bi-arrow-left me-1"></i> Back to Food Catalog
+  </a>
+  <h2 class="fw-bold text-dark mb-1">{{ 'Edit Food Item' if food else 'Add New Food Item' }}</h2>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="admin-card p-4 p-md-5">
+      <form action="{{ url_for('admin_food_edit', food_id=food.id) if food else url_for('admin_food_add') }}" method="POST">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Food Name <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Hyderabadi Chicken Dum Biryani" value="{{ food.name if food else '' }}" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Food Type <span class="text-danger">*</span></label>
+            <select name="food_type" class="form-select">
+              <option value="veg" {% if food and food.food_type == 'veg' %}selected{% endif %}>Vegetarian (Veg)</option>
+              <option value="non-veg" {% if food and food.food_type == 'non-veg' %}selected{% endif %}>Non-Vegetarian</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Restaurant <span class="text-danger">*</span></label>
+            <select name="restaurant_id" class="form-select" required>
+              <option value="">Select Restaurant</option>
+              {% for rest in restaurants %}
+                <option value="{{ rest.id }}" {% if food and food.restaurant_id == rest.id %}selected{% endif %}>{{ rest.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+            <select name="category_id" class="form-select" required>
+              <option value="">Select Category</option>
+              {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if food and food.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Price (₹) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" name="price" class="form-control" placeholder="299.00" value="{{ food.price if food else '' }}" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Initial Availability</label>
+            <select name="availability" class="form-select">
+              <option value="1" {% if not food or food.availability %}selected{% endif %}>Available in Kitchen</option>
+              <option value="0" {% if food and not food.availability %}selected{% endif %}>Out of Stock / Unavailable</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+            <textarea name="description" rows="3" class="form-control" placeholder="Detailed taste profile and description..." required>{{ food.description if food else '' }}</textarea>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold">Key Ingredients</label>
+            <textarea name="ingredients" rows="2" class="form-control" placeholder="e.g. Basmati Rice, Chicken, Saffron, Ghee, Mint">{{ food.ingredients if food else '' }}</textarea>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-semibold">Image Asset Path / Filename</label>
+            <input type="text" name="image" class="form-control" placeholder="food/chicken_biryani.svg" value="{{ food.image if food else 'food/chicken_biryani.svg' }}">
+            <div class="form-text small">Path relative to static/images/ (e.g. food/veg_pizza.svg)</div>
+          </div>
+
+          <div class="col-12 text-end mt-4 pt-3 border-top">
+            <a href="{{ url_for('admin_food') }}" class="btn btn-light border me-2">Cancel</a>
+            <button type="submit" class="btn btn-primary-custom px-4">
+              <i class="bi bi-check-lg me-1"></i> {{ 'Update Food Item' if food else 'Save Food Item' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

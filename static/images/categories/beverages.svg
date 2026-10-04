@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <linearGradient id="grad_beverages" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EFF6FF" />
+      <stop offset="100%" stop-color="#DBEAFE" />
+    </linearGradient>
+    <filter id="shadow_beverages" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <circle cx="80" cy="80" r="76" fill="url(#grad_beverages)" stroke="#93C5FD" stroke-width="2" />
+  <circle cx="80" cy="80" r="54" fill="#ffffff" opacity="0.9" filter="url(#shadow_beverages)" />
+  <text x="80" y="100" font-size="56" text-anchor="middle" font-family="'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif">🥤</text>
+</svg>

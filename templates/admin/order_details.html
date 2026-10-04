@@ -1,0 +1,151 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Manage {{ order.formatted_id if order else 'Order' }} - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin_orders') }}" class="text-muted small text-decoration-none mb-1 d-inline-block">
+    <i class="bi bi-arrow-left me-1"></i> Back to Orders
+  </a>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <h2 class="fw-bold text-dark mb-0">Order: {{ order.formatted_id if order else '' }}</h2>
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-muted small">Current Status:</span>
+      <span class="badge {{ step_info.badge_class if step_info else 'bg-secondary' }} px-3 py-2 rounded-pill fs-6">
+        {{ order.order_status if order else 'Unknown' }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Order Status Quick Action Bar -->
+<div class="admin-card p-3 mb-4 bg-white">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div class="fw-bold text-dark">
+      <i class="bi bi-arrow-repeat me-1 text-primary"></i> Change Fulfillment Status:
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      <form action="{{ url_for('admin_order_status', order_id=order.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="status" value="Accepted">
+        <button type="submit" class="btn btn-sm btn-info text-white" {% if order.order_status == 'Accepted' %}disabled{% endif %}>
+          <i class="bi bi-check2"></i> Accept Order
+        </button>
+      </form>
+
+      <form action="{{ url_for('admin_order_status', order_id=order.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="status" value="Preparing">
+        <button type="submit" class="btn btn-sm btn-warning" {% if order.order_status == 'Preparing' %}disabled{% endif %}>
+          <i class="bi bi-fire"></i> Mark Preparing
+        </button>
+      </form>
+
+      <form action="{{ url_for('admin_order_status', order_id=order.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="status" value="Out for Delivery">
+        <button type="submit" class="btn btn-sm btn-primary" {% if order.order_status == 'Out for Delivery' %}disabled{% endif %}>
+          <i class="bi bi-bicycle"></i> Mark Out for Delivery
+        </button>
+      </form>
+
+      <form action="{{ url_for('admin_order_status', order_id=order.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="status" value="Delivered">
+        <button type="submit" class="btn btn-sm btn-success" {% if order.order_status == 'Delivered' %}disabled{% endif %}>
+          <i class="bi bi-check2-all"></i> Mark Delivered
+        </button>
+      </form>
+
+      <form action="{{ url_for('admin_order_status', order_id=order.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="status" value="Rejected">
+        <button type="submit" class="btn btn-sm btn-outline-danger" {% if order.order_status in ['Rejected', 'Cancelled', 'Delivered'] %}disabled{% endif %}>
+          <i class="bi bi-x-circle"></i> Reject Order
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Items Table -->
+  <div class="col-lg-7">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h5 class="admin-card-title">Ordered Items ({{ order.items | length if (order and order.items) else 0 }})</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table admin-table mb-0">
+          <thead>
+            <tr>
+              <th>Dish</th>
+              <th>Kitchen</th>
+              <th class="text-center">Price</th>
+              <th class="text-center">Qty</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="food-type-icon {{ item.food_item.food_type if item.food_item else 'veg' }}"></span>
+                  <span class="fw-semibold text-dark">{{ item.food_item.name if item.food_item else 'Dish' }}</span>
+                </div>
+              </td>
+              <td class="text-muted small">{{ item.food_item.restaurant.name if (item.food_item and item.food_item.restaurant) else 'N/A' }}</td>
+              <td class="text-center">₹{{ "%.2f" | format(item.price | float if item.price is not none else 0.0) }}</td>
+              <td class="text-center fw-bold">{{ item.quantity or 1 }}</td>
+              <td class="text-end fw-bold">₹{{ "%.2f" | format(item.item_total if item.item_total is not none else 0.0) }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-3">No line items in this order.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center">
+        <span class="fw-bold">Total Order Value:</span>
+        <span class="h4 fw-bold text-primary mb-0">₹{{ "%.2f" | format(order.total_amount | float if (order and order.total_amount is not none) else 0.0) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer & Delivery Specs -->
+  <div class="col-lg-5">
+    <div class="admin-card p-4">
+      <h5 class="admin-card-title mb-3">Customer & Delivery Details</h5>
+
+      <div class="mb-3">
+        <label class="text-muted small text-uppercase">Customer Name</label>
+        <div class="fw-bold text-dark">{{ order.user.name if (order and order.user) else 'Customer' }}</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="text-muted small text-uppercase">Email Address</label>
+        <div class="text-dark">{{ order.user.email if (order and order.user) else 'N/A' }}</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="text-muted small text-uppercase">Contact Phone</label>
+        <div class="text-dark fw-semibold">{{ order.phone if order else 'N/A' }}</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="text-muted small text-uppercase">Delivery Address</label>
+        <div class="text-dark">{{ order.delivery_address if order else 'N/A' }}</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="text-muted small text-uppercase">Payment Method</label>
+        <div><span class="badge bg-light text-dark border">{{ order.payment_method if order else 'Cash on Delivery' }}</span></div>
+      </div>
+
+      <div>
+        <label class="text-muted small text-uppercase">Timestamp</label>
+        <div class="text-muted small">{{ order.order_date.strftime('%d %B %Y, %I:%M:%S %p') if (order and order.order_date) else 'N/A' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

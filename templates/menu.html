@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Food Menu - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Filter Sidebar Column -->
+    <div class="col-lg-3">
+      <div class="filter-card position-sticky" style="top: 90px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-funnel me-1 text-primary"></i> Filters</h5>
+          <a href="{{ url_for('menu') }}" class="small text-muted text-decoration-none">Reset All</a>
+        </div>
+
+        <form action="{{ url_for('menu') }}" method="GET" id="filter-form">
+          <!-- Keyword Search -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small text-uppercase text-muted">Search Food</label>
+            <div class="input-group">
+              <input type="text" name="q" class="form-control form-control-sm" placeholder="Search dish..." value="{{ selected_q or '' }}">
+              <button class="btn btn-sm btn-primary-custom" type="submit">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Food Type (Veg / Non-Veg) -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small text-uppercase text-muted">Diet Preference</label>
+            <div class="d-flex flex-column gap-2">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="food_type" id="type-all" value="" {% if not selected_type %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label small" for="type-all">All Diet Types</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="food_type" id="type-veg" value="veg" {% if selected_type == 'veg' %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label small text-success fw-semibold" for="type-veg">
+                  <span class="food-type-icon veg me-1" style="vertical-align: middle;"></span> Pure Vegetarian
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="food_type" id="type-nonveg" value="non-veg" {% if selected_type == 'non-veg' %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label small text-danger fw-semibold" for="type-nonveg">
+                  <span class="food-type-icon non-veg me-1" style="vertical-align: middle;"></span> Non-Vegetarian
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories Filter -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small text-uppercase text-muted">Categories</label>
+            <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              {% for cat in categories %}
+                <option value="{{ cat.name }}" {% if selected_category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Restaurant Filter -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small text-uppercase text-muted">Restaurant</label>
+            <select name="restaurant_id" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">All Restaurants</option>
+              {% for rest in restaurants %}
+                <option value="{{ rest.id }}" {% if selected_restaurant_id == rest.id | string %}selected{% endif %}>{{ rest.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Price Filter -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-uppercase text-muted">Price Range</label>
+            <select name="price_range" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">All Prices</option>
+              <option value="under_150" {% if selected_price == 'under_150' %}selected{% endif %}>Under ₹150</option>
+              <option value="150_300" {% if selected_price == '150_300' %}selected{% endif %}>₹150 to ₹300</option>
+              <option value="above_300" {% if selected_price == 'above_300' %}selected{% endif %}>Above ₹300</option>
+            </select>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Food Catalog Items Column -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">Explore Dishes</h3>
+          <p class="text-muted small mb-0">Showing {{ food_items | length }} delicious options</p>
+        </div>
+
+        {% if selected_category or selected_type or selected_q %}
+          <div class="d-flex gap-2">
+            {% if selected_category %}
+              <span class="badge bg-primary px-3 py-2 rounded-pill">{{ selected_category }}</span>
+            {% endif %}
+            {% if selected_type %}
+              <span class="badge bg-dark px-3 py-2 rounded-pill">{{ selected_type | capitalize }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      {% if food_items %}
+        <div class="row g-4">
+          {% for item in food_items %}
+          <div class="col-md-6 col-xl-4">
+            <div class="food-card">
+              <div class="food-img-wrapper">
+                <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}">
+              </div>
+              <div class="food-card-body">
+                <div class="food-header">
+                  <span class="food-type-icon {{ item.food_type }}" title="{{ item.food_type | capitalize }}"></span>
+                  <span class="badge bg-light text-muted border small">{{ item.category.name }}</span>
+                </div>
+                <h5 class="food-title">{{ item.name }}</h5>
+                <a href="{{ url_for('restaurant_detail', restaurant_id=item.restaurant.id) }}" class="food-restaurant-link">
+                  by {{ item.restaurant.name }}
+                </a>
+                <p class="food-desc">{{ item.description }}</p>
+
+                <div class="food-card-footer">
+                  <div class="food-price">₹{{ item.price }}</div>
+                  <div class="d-flex gap-2">
+                    <a href="{{ url_for('food_details', food_id=item.id) }}" class="btn btn-sm btn-light border" title="View Details">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <button onclick="addToCart({{ item.id }})" class="btn btn-sm btn-primary-custom" {% if not item.availability %}disabled{% endif %}>
+                      {% if item.availability %}
+                        <i class="bi bi-plus-lg"></i> Add
+                      {% else %}
+                        Sold Out
+                      {% endif %}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+          <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+          <h4 class="fw-bold mt-3">No matching dishes found</h4>
+          <p class="text-muted">Try adjusting your filters or search keywords.</p>
+          <a href="{{ url_for('menu') }}" class="btn btn-primary-custom">Clear All Filters</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

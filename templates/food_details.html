@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ food.name }} - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5">
+    <div class="row g-0">
+      <!-- Food Image Column -->
+      <div class="col-lg-6">
+        <div class="p-4 p-md-5 d-flex align-items-center justify-content-center bg-light h-100">
+          <img src="{{ url_for('static', filename='images/' + food.image) }}" alt="{{ food.name }}" class="img-fluid rounded-4 shadow-sm" style="max-height: 420px; width: 100%; object-fit: cover;">
+        </div>
+      </div>
+
+      <!-- Food Details Column -->
+      <div class="col-lg-6 p-4 p-md-5 d-flex flex-column justify-content-between">
+        <div>
+          <!-- Badges -->
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge {{ 'badge-veg' if food.food_type == 'veg' else 'badge-nonveg' }} px-3 py-1">
+              <span class="food-type-icon {{ food.food_type }} me-1"></span>
+              {{ 'Pure Veg' if food.food_type == 'veg' else 'Non-Vegetarian' }}
+            </span>
+            <span class="badge bg-light text-dark border px-3 py-1">
+              {{ food.category.name }}
+            </span>
+            <span class="badge bg-success-subtle text-success px-3 py-1">
+              <i class="bi bi-star-fill text-warning me-1"></i> 4.7 (120+ ratings)
+            </span>
+          </div>
+
+          <h1 class="fw-bold mb-2">{{ food.name }}</h1>
+          
+          <div class="mb-3">
+            <span class="text-muted">Prepared with love by:</span>
+            <a href="{{ url_for('restaurant_detail', restaurant_id=food.restaurant.id) }}" class="fw-bold text-dark text-decoration-none ms-1">
+              <i class="bi bi-shop me-1 text-primary"></i> {{ food.restaurant.name }}
+            </a>
+          </div>
+
+          <!-- Price -->
+          <div class="display-6 fw-bold text-primary mb-4">
+            ₹{{ food.price }}
+          </div>
+
+          <!-- Description -->
+          <div class="mb-4">
+            <h6 class="fw-bold text-uppercase text-muted small">Description</h6>
+            <p class="text-secondary">{{ food.description }}</p>
+          </div>
+
+          <!-- Ingredients -->
+          {% if food.ingredients %}
+          <div class="mb-4">
+            <h6 class="fw-bold text-uppercase text-muted small">Key Ingredients</h6>
+            <p class="text-secondary small">{{ food.ingredients }}</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Add to Cart Action -->
+        <div class="pt-4 border-top">
+          {% if food.availability %}
+            <div class="row g-3 align-items-center">
+              <div class="col-auto">
+                <div class="qty-selector">
+                  <button type="button" class="qty-btn minus"><i class="bi bi-dash"></i></button>
+                  <input type="number" id="detail-qty" class="qty-value border-0" value="1" min="1" max="20" readonly>
+                  <button type="button" class="qty-btn plus"><i class="bi bi-plus"></i></button>
+                </div>
+              </div>
+              <div class="col">
+                <button onclick="addToCart({{ food.id }}, parseInt(document.getElementById('detail-qty').value))" class="btn btn-primary-custom w-100 py-2 fs-6">
+                  <i class="bi bi-bag-plus-fill me-2"></i> Add to Cart
+                </button>
+              </div>
+            </div>
+          {% else %}
+            <div class="alert alert-warning mb-0">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i> Currently unavailable at this restaurant.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Items from same category -->
+  {% if related_foods %}
+  <div class="mt-5">
+    <h3 class="fw-bold mb-4">You Might Also Like</h3>
+    <div class="row g-4">
+      {% for item in related_foods %}
+      <div class="col-md-6 col-lg-3">
+        <div class="food-card">
+          <div class="food-img-wrapper">
+            <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}">
+          </div>
+          <div class="food-card-body">
+            <div class="food-header">
+              <span class="food-type-icon {{ item.food_type }}"></span>
+              <span class="badge bg-light text-muted border small">{{ item.category.name }}</span>
+            </div>
+            <h6 class="food-title text-truncate">{{ item.name }}</h6>
+            <div class="food-card-footer mt-3">
+              <div class="food-price fs-6">₹{{ item.price }}</div>
+              <a href="{{ url_for('food_details', food_id=item.id) }}" class="btn btn-sm btn-outline-custom">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

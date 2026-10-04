@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1"><i class="bi bi-shield-check text-success me-2"></i> Express Checkout</h2>
+    <p class="text-muted">Confirm your delivery details and choose a convenient payment option</p>
+  </div>
+
+  <form action="{{ url_for('place_order') }}" method="POST" id="checkout-form">
+    <div class="row g-4">
+      <!-- Delivery Details Column -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+          <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt-fill text-primary"></i> 1. Delivery Information
+          </h5>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Customer Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control" value="{{ user.name if user else '' }}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+              <input type="tel" name="phone" class="form-control" value="{{ user.phone if user else '' }}" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Complete Address <span class="text-danger">*</span></label>
+              <textarea name="delivery_address" rows="2" class="form-control" placeholder="House/Flat No, Apartment, Street, Locality" required>{{ user.address if user else '' }}</textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+              <input type="text" name="city" class="form-control" value="Bengaluru" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Pincode <span class="text-danger">*</span></label>
+              <input type="text" name="pincode" class="form-control" value="560038" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Delivery Instructions (Optional)</label>
+              <input type="text" name="instructions" class="form-control" placeholder="e.g. Ring doorbell, leave at security gate">
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Selection Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-credit-card-fill text-primary"></i> 2. Choose Payment Method
+          </h5>
+
+          <div class="d-flex flex-column gap-3">
+            <!-- Cash on Delivery -->
+            <label class="p-3 border rounded-3 d-flex align-items-center gap-3 cursor-pointer" style="cursor: pointer;">
+              <input type="radio" name="payment_method" id="payment-cod" value="Cash on Delivery" class="form-check-input mt-0" checked>
+              <div class="d-flex align-items-center gap-3 w-100">
+                <i class="bi bi-cash-stack fs-3 text-success"></i>
+                <div>
+                  <div class="fw-bold">Cash on Delivery (COD)</div>
+                  <div class="text-muted small">Pay with cash or UPI scan when your food arrives.</div>
+                </div>
+              </div>
+            </label>
+
+            <!-- Demo Online Payment -->
+            <label class="p-3 border rounded-3 d-flex align-items-center gap-3 cursor-pointer" style="cursor: pointer;">
+              <input type="radio" name="payment_method" id="payment-online" value="Demo Online Payment" class="form-check-input mt-0">
+              <div class="d-flex align-items-center gap-3 w-100">
+                <i class="bi bi-credit-card-2-front fs-3 text-primary"></i>
+                <div>
+                  <div class="fw-bold d-flex align-items-center gap-2">
+                    Demo Online Payment <span class="badge bg-primary-subtle text-primary">Instant</span>
+                  </div>
+                  <div class="text-muted small">Cards, UPI, NetBanking (Academic Simulation Mode).</div>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Review Column -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white position-sticky" style="top: 100px;">
+          <h5 class="fw-bold mb-3">Order Summary</h5>
+
+          <div class="order-items-scroll mb-3" style="max-height: 250px; overflow-y: auto;">
+            {% for item in cart_items %}
+            <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div class="d-flex align-items-center gap-2">
+                <span class="food-type-icon {{ item.food_item.food_type }}"></span>
+                <div>
+                  <div class="fw-semibold small text-dark">{{ item.food_item.name }}</div>
+                  <small class="text-muted">Qty: {{ item.quantity }} × ₹{{ item.food_item.price }}</small>
+                </div>
+              </div>
+              <span class="fw-bold small">₹{{ "%.2f" | format(item.item_total) }}</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small text-muted">
+            <span>Item Subtotal</span>
+            <span>₹{{ "%.2f" | format(summary.subtotal) }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small text-muted">
+            <span>Delivery Fee</span>
+            <span>
+              {% if summary.delivery_fee == 0 %}
+                <span class="text-success fw-bold">FREE</span>
+              {% else %}
+                ₹{{ "%.2f" | format(summary.delivery_fee) }}
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-3 small text-muted">
+            <span>Taxes & GST (5%)</span>
+            <span>₹{{ "%.2f" | format(summary.tax) }}</span>
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="h5 fw-bold mb-0">Total Payable</span>
+            <span class="h4 fw-bold text-primary mb-0">₹{{ "%.2f" | format(summary.grand_total) }}</span>
+          </div>
+
+          <button type="submit" id="place-order-btn" class="btn btn-primary-custom w-100 py-3 fs-6">
+            <i class="bi bi-bag-check-fill me-2"></i> Place Order (₹{{ "%.2f" | format(summary.grand_total) }})
+          </button>
+
+          <p class="text-center text-muted small mt-3 mb-0">
+            <i class="bi bi-lock-fill text-success me-1"></i> Safe and secure 256-bit encrypted checkout
+          </p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Demo Online Payment Simulation Modal -->
+<div class="modal fade" id="demoPaymentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="bi bi-wallet2 text-primary me-2"></i> FoodExpress Demo Gateway</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-4">
+        <div class="alert alert-info small py-2">
+          <i class="bi bi-info-circle me-1"></i> This is a simulated student project payment interface. No real money will be charged.
+        </div>
+
+        <div class="text-center my-3">
+          <span class="text-muted small">Paying Total Amount:</span>
+          <h2 class="fw-bold text-primary">₹{{ "%.2f" | format(summary.grand_total) }}</h2>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Demo Card Number</label>
+          <input type="text" class="form-control" value="4532 •••• •••• 8821" readonly>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label small fw-semibold">Expiry Date</label>
+            <input type="text" class="form-control" value="08/28" readonly>
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold">CVV</label>
+            <input type="password" class="form-control" value="888" readonly>
+          </div>
+        </div>
+
+        <div class="d-grid mt-4">
+          <button type="button" id="confirm-demo-payment-btn" class="btn btn-success py-2 fw-bold">
+            <i class="bi bi-check2-circle me-1"></i> Authorize & Pay ₹{{ "%.2f" | format(summary.grand_total) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+{% endblock %}

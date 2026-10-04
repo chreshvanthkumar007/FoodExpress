@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Hero Section in About -->
+  <div class="text-center max-w-700 mx-auto mb-5">
+    <div class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold mb-2">
+      About FoodExpress
+    </div>
+    <h1 class="fw-bold display-5 mb-3">Delivering Happiness, One Meal at a Time</h1>
+    <p class="text-muted lead">
+      FoodExpress is an innovative college mini project designed to connect foodies with the best kitchens and restaurants in town with speed, simplicity, and delight.
+    </p>
+  </div>
+
+  <!-- Features Grid -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+        <div class="p-3 bg-primary-light text-primary rounded-circle d-inline-flex mx-auto mb-3 fs-2">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <h4 class="fw-bold mb-2">30-Min Delivery</h4>
+        <p class="text-muted small mb-0">
+          Our intelligent routing and prioritized kitchen dispatch ensure your meals reach your table piping hot.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+        <div class="p-3 bg-success-subtle text-success rounded-circle d-inline-flex mx-auto mb-3 fs-2">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Hygiene Certified</h4>
+        <p class="text-muted small mb-0">
+          We partner exclusively with verified culinary kitchens that comply with top-tier food safety standards.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+        <div class="p-3 bg-danger-subtle text-danger rounded-circle d-inline-flex mx-auto mb-3 fs-2">
+          <i class="bi bi-geo-alt"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Live Order Tracking</h4>
+        <p class="text-muted small mb-0">
+          Stay informed from the moment your food is accepted in the kitchen right up to your front door.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-Step Process -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5">
+    <h3 class="fw-bold text-center mb-5">How FoodExpress Works</h3>
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="display-5 fw-bold text-primary mb-2">01</div>
+        <h5 class="fw-bold mb-2">Choose Food</h5>
+        <p class="text-muted small">
+          Explore delicious cuisines, authentic Biryanis, Pizzas, Burgers, and curries from top partner restaurants.
+        </p>
+      </div>
+
+      <div class="col-md-4">
+        <div class="display-5 fw-bold text-primary mb-2">02</div>
+        <h5 class="fw-bold mb-2">Place Order</h5>
+        <p class="text-muted small">
+          Review your cart items, select Cash on Delivery or fast Demo Online Payment, and confirm your order in one click.
+        </p>
+      </div>
+
+      <div class="col-md-4">
+        <div class="display-5 fw-bold text-primary mb-2">03</div>
+        <h5 class="fw-bold mb-2">Get Food Delivered</h5>
+        <p class="text-muted small">
+          Sit back, relax, and track your delivery in real-time as our delivery partners bring fresh hot meals to your door.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech Specs for College Mini Project -->
+  <div class="p-4 rounded-4 bg-light border">
+    <h5 class="fw-bold mb-2"><i class="bi bi-code-slash text-primary me-2"></i> About This Mini Project</h5>
+    <p class="text-muted small mb-3">
+      This application is engineered as a full-stack mini project using Python 3, Flask framework, and MySQL 8.0 relational database with Flask-SQLAlchemy ORM.
+    </p>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="badge bg-dark">Python 3</span>
+      <span class="badge bg-dark">Flask</span>
+      <span class="badge bg-dark">MySQL 8.0</span>
+      <span class="badge bg-dark">Flask-SQLAlchemy</span>
+      <span class="badge bg-dark">Bootstrap 5</span>
+      <span class="badge bg-dark">Werkzeug Security</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - FoodExpress{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- User Overview Card -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+        <div class="d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 2.2rem; font-weight: 700;">
+          {{ (user.name[0] if user.name else 'U') | upper }}
+        </div>
+        <h4 class="fw-bold mb-1">{{ user.name }}</h4>
+        <p class="text-muted small mb-2">{{ user.email }}</p>
+        <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill mx-auto mb-3">
+          <i class="bi bi-shield-check me-1"></i> Active {{ user.role | capitalize }} Account
+        </span>
+
+        <hr class="my-3">
+
+        <div class="text-start small">
+          <div class="mb-2 text-muted"><i class="bi bi-telephone me-2 text-dark"></i> {{ user.phone }}</div>
+          <div class="mb-3 text-muted"><i class="bi bi-geo-alt me-2 text-dark"></i> {{ user.address }}</div>
+          <div class="text-muted"><i class="bi bi-calendar3 me-2 text-dark"></i> Member since {{ user.created_at.strftime('%b %Y') if user.created_at else '2026' }}</div>
+        </div>
+
+        <div class="d-grid mt-4">
+          <a href="{{ url_for('orders') }}" class="btn btn-outline-custom">
+            <i class="bi bi-bag-check me-2"></i> View Order History
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profile & Change Password Tabs -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <ul class="nav nav-pills mb-4" id="profileTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-semibold" id="edit-tab" data-bs-toggle="pill" data-bs-target="#edit-profile" type="button" role="tab">
+              <i class="bi bi-person-gear me-1"></i> Edit Profile Details
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="security-tab" data-bs-toggle="pill" data-bs-target="#security" type="button" role="tab">
+              <i class="bi bi-lock me-1"></i> Change Password
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="profileTabContent">
+          <!-- Edit Profile Details Tab -->
+          <div class="tab-pane fade show active" id="edit-profile" role="tabpanel">
+            <form action="{{ url_for('profile') }}" method="POST">
+              <input type="hidden" name="action" value="update_profile">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Full Name</label>
+                  <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Email Address</label>
+                  <input type="email" class="form-control bg-light" value="{{ user.email }}" disabled>
+                  <small class="text-muted">Email address cannot be changed.</small>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Phone Number</label>
+                  <input type="tel" name="phone" class="form-control" value="{{ user.phone }}" required>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Delivery Address</label>
+                  <textarea name="address" rows="3" class="form-control" required>{{ user.address }}</textarea>
+                </div>
+
+                <div class="col-12 text-end mt-4">
+                  <button type="submit" class="btn btn-primary-custom px-4">
+                    <i class="bi bi-save me-1"></i> Save Changes
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Change Password Tab -->
+          <div class="tab-pane fade" id="security" role="tabpanel">
+            <form action="{{ url_for('profile') }}" method="POST">
+              <input type="hidden" name="action" value="change_password">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Current Password</label>
+                  <input type="password" name="current_password" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">New Password</label>
+                  <input type="password" name="new_password" class="form-control" placeholder="Min. 6 characters" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Confirm New Password</label>
+                  <input type="password" name="confirm_password" class="form-control" placeholder="Repeat new password" required>
+                </div>
+
+                <div class="col-12 text-end mt-4">
+                  <button type="submit" class="btn btn-primary-custom px-4">
+                    <i class="bi bi-key me-1"></i> Update Password
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

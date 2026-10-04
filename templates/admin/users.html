@@ -1,0 +1,83 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}User Management - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-dark mb-1">Registered Users</h2>
+    <p class="text-muted mb-0">View customer accounts, roles, addresses, and toggle account activation</p>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="input-group" style="max-width: 320px;">
+      <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+      <input type="text" id="admin-table-search" class="form-control" placeholder="Search user name or email...">
+    </div>
+    <span class="badge bg-light text-dark border px-3 py-2">Total Accounts: {{ users | length }}</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Contact</th>
+          <th>Default Delivery Address</th>
+          <th>Role</th>
+          <th>Registered</th>
+          <th>Status</th>
+          <th class="text-end">Account Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="rounded-circle bg-light text-primary fw-bold d-flex align-items-center justify-content-center border" style="width: 38px; height: 38px;">
+                {{ (u.name[0] if u.name else 'U') | upper }}
+              </div>
+              <div>
+                <div class="fw-bold text-dark">{{ u.name }}</div>
+                <div class="text-muted small">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="text-muted">{{ u.phone }}</td>
+          <td class="text-muted small text-truncate" style="max-width: 200px;" title="{{ u.address }}">
+            {{ u.address }}
+          </td>
+          <td>
+            <span class="badge {{ 'bg-danger' if u.role == 'admin' else 'bg-light text-dark border' }}">
+              {{ u.role | upper }}
+            </span>
+          </td>
+          <td class="text-muted small">
+            {{ u.created_at.strftime('%d %b %Y') if u.created_at else 'N/A' }}
+          </td>
+          <td>
+            <span class="badge {{ 'bg-success' if u.status == 'active' else 'bg-danger' }} px-2 py-1 rounded-pill">
+              {{ u.status | capitalize }}
+            </span>
+          </td>
+          <td class="text-end">
+            {% if u.id != session.get('user_id') %}
+              <form action="{{ url_for('admin_user_toggle', user_id=u.id) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-sm {{ 'btn-outline-danger' if u.status == 'active' else 'btn-outline-success' }}" title="Toggle Active / Suspended status">
+                  {{ 'Deactivate' if u.status == 'active' else 'Activate' }}
+                </button>
+              </form>
+            {% else %}
+              <span class="text-muted small fst-italic">Logged in admin</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

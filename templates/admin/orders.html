@@ -1,0 +1,112 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Orders Management - FoodExpress Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="fw-bold text-dark mb-1">Customer Orders</h2>
+    <p class="text-muted mb-0">Track live orders, dispatch deliveries, and update fulfillment statuses</p>
+  </div>
+  
+  <!-- Status Filter Pills -->
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{{ url_for('admin_orders') }}" class="btn btn-sm {{ 'btn-dark' if not selected_status else 'btn-outline-secondary' }}">All</a>
+    <a href="{{ url_for('admin_orders', status='Order Placed') }}" class="btn btn-sm {{ 'btn-secondary' if selected_status == 'Order Placed' else 'btn-outline-secondary' }}">New Placed</a>
+    <a href="{{ url_for('admin_orders', status='Accepted') }}" class="btn btn-sm {{ 'btn-info' if selected_status == 'Accepted' else 'btn-outline-secondary' }}">Accepted</a>
+    <a href="{{ url_for('admin_orders', status='Preparing') }}" class="btn btn-sm {{ 'btn-warning' if selected_status == 'Preparing' else 'btn-outline-secondary' }}">Preparing</a>
+    <a href="{{ url_for('admin_orders', status='Out for Delivery') }}" class="btn btn-sm {{ 'btn-primary' if selected_status == 'Out for Delivery' else 'btn-outline-secondary' }}">Out for Delivery</a>
+    <a href="{{ url_for('admin_orders', status='Delivered') }}" class="btn btn-sm {{ 'btn-success' if selected_status == 'Delivered' else 'btn-outline-secondary' }}">Delivered</a>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <div class="input-group" style="max-width: 320px;">
+      <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+      <input type="text" id="admin-table-search" class="form-control" placeholder="Search by customer or ID...">
+    </div>
+    <span class="badge bg-light text-dark border px-3 py-2">Found: {{ orders | length }} orders</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Items Ordered</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Current Status</th>
+          <th>Quick Status Update</th>
+          <th class="text-end">Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if orders %}
+          {% for order in orders %}
+          <tr>
+            <td>
+              <span class="fw-bold text-dark">{{ order.formatted_id }}</span>
+              <div class="text-muted" style="font-size: 0.75rem;">{{ order.order_date.strftime('%d %b, %H:%M') if order.order_date else '' }}</div>
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">{{ order.user.name if order.user else 'Customer' }}</div>
+              <div class="text-muted small">{{ order.phone }}</div>
+            </td>
+            <td>
+              <div class="small text-truncate" style="max-width: 220px;" title="{% for item in order.items %}{{ item.quantity }}x {{ item.food_item.name if item.food_item else 'Dish' }}, {% endfor %}">
+                {% for item in order.items %}
+                  {{ item.quantity }}x {{ item.food_item.name if item.food_item else 'Dish' }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+              </div>
+            </td>
+            <td class="fw-bold text-dark">
+              ₹{{ "%.2f" | format(order.total_amount) }}
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border small">{{ order.payment_method }}</span>
+            </td>
+            <td>
+              {% set status_class = 'bg-secondary' %}
+              {% if order.order_status == 'Delivered' %}{% set status_class = 'bg-success' %}
+              {% elif order.order_status == 'Preparing' %}{% set status_class = 'bg-warning text-dark' %}
+              {% elif order.order_status == 'Out for Delivery' %}{% set status_class = 'bg-primary' %}
+              {% elif order.order_status == 'Accepted' %}{% set status_class = 'bg-info' %}
+              {% elif order.order_status in ['Cancelled', 'Rejected'] %}{% set status_class = 'bg-danger' %}
+              {% endif %}
+              <span class="badge {{ status_class }} px-2 py-1 rounded-pill">{{ order.order_status }}</span>
+            </td>
+            <td>
+              <form action="{{ url_for('admin_order_status', order_id=order.id) }}" method="POST" class="d-inline">
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 150px;">
+                  <option value="Order Placed" {% if order.order_status == 'Order Placed' %}selected{% endif %}>Order Placed</option>
+                  <option value="Accepted" {% if order.order_status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                  <option value="Preparing" {% if order.order_status == 'Preparing' %}selected{% endif %}>Preparing</option>
+                  <option value="Out for Delivery" {% if order.order_status == 'Out for Delivery' %}selected{% endif %}>Out for Delivery</option>
+                  <option value="Delivered" {% if order.order_status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                  <option value="Rejected" {% if order.order_status == 'Rejected' %}selected{% endif %}>Reject Order</option>
+                  <option value="Cancelled" {% if order.order_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+              </form>
+            </td>
+            <td class="text-end">
+              <a href="{{ url_for('admin_order_detail', order_id=order.id) }}" class="btn btn-sm btn-light border">
+                <i class="bi bi-eye me-1"></i> View
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="text-center py-5 text-muted">
+              No orders found matching the filter.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
