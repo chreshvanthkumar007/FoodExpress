@@ -1,4 +1,10 @@
 import os
+import sys
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+if basedir not in sys.path:
+    sys.path.insert(0, basedir)
+
 from datetime import datetime
 from flask import (
     Flask, render_template, request, redirect, url_for, 
