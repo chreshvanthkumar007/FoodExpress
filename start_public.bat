@@ -24,6 +24,15 @@ if exist "C:\Program Files (x86)\cloudflared\cloudflared.exe" (
     set CLOUDFLARED_CMD="C:\Program Files (x86)\cloudflared\cloudflared.exe"
 ) else if exist "C:\Program Files\cloudflared\cloudflared.exe" (
     set CLOUDFLARED_CMD="C:\Program Files\cloudflared\cloudflared.exe"
+) else (
+    where cloudflared >nul 2>&1
+    if errorlevel 1 (
+        echo [!] Cloudflare tunnel executable (cloudflared.exe) was not found.
+        echo [*] You can install it using: winget install --id Cloudflare.cloudflared
+        echo [*] Or use your Wi-Fi URL displayed above to access from any phone on the same Wi-Fi.
+        pause
+        exit /b 1
+    )
 )
 
 %CLOUDFLARED_CMD% tunnel --url http://127.0.0.1:5000
